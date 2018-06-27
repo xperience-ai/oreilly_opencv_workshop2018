@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Face Detection Camera Example</title>
+<link href="files/js_example_style.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<h2>Face Detection and Remote Recognition Example</h2>
+<p>
+    Click <b>Start/Stop</b> button to start or stop the camera capture.</br>
+    Click <b>Introduce</b> button to introduce new person to the system.</br>
+    Click <b>Recognize</b> button to recognize all people on frame.</br>
+    The <b>videoInput</b> is a &lt;video&gt; element used as face detector input.
+    The <b>canvasOutput</b> is a &lt;canvas&gt; element used as face detector output.<br>
+</p>
+<div class="control">
+    <p>Remote server address:</p>
+    <input type="text" value="localhost:8080" id="serverUrl"/></br></br>
+    <button id="startAndStop" disabled>Start</button>
+    <button id="introduce" type="button" disabled="true">Introduce</button>
+    <button id="recognize" type="button" disabled="true">Recognize</button>
+</div>
+<p class="err" id="errorMessage"></p>
+<div>
+    <table cellpadding="0" cellspacing="0" width="0" border="0">
+    <tr>
+        <td>
+            <video id="videoInput" width=320 height=240></video>
+        </td>
+        <td>
+            <canvas id="canvasOutput" width=320 height=240></canvas>
+        </td>
+        <td>
+            <textarea id="peopleList" rows="16" cols="40" id="codeEditor" spellcheck="false">
+            </textarea>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="caption">Camera Input</div>
+        </td>
+        <td>
+            <div class="caption">Detected Faces</div>
+        </td>
+        <td>
+            <div class="caption">Recognized People</div>
+        </td>
+    </tr>
+    </table>
+</div>
+
+<div id="facePrompt" style="display:none;">
+  <p>Introduce yourself:</p>
+  <p>
+    <canvas id="intrducingFormFace" width=160 height=120></canvas><br/>
+    <input type="text"  id="name" />
+    <input type="submit" name="button" id="button" value="Submit" onClick="onPersonIntroduced()" />
+  </p>
+</div>
+
+<script src="files/utils.js" type="text/javascript"></script>
+<script type="text/javascript">
+let utils = new Utils('errorMessage');
+
+let streaming = false;
+let introducing = false;
+let videoInput = document.getElementById('videoInput');
+let startAndStop = document.getElementById('startAndStop');
+let introduce = document.getElementById('introduce');
+let recognize = document.getElementById('recognize');
+let canvasOutput = document.getElementById('canvasOutput');
+let canvasFace = document.getElementById("intrducingFormFace")
+let canvasContext = canvasOutput.getContext('2d');
+
+utils.loadOpenCv(() => {
+    utils.createFileFromUrl('haarcascade_frontalface_default.xml', 'files/haarcascade_frontalface_default.xml', () => {
+        startAndStop.disabled = false;
+    });
+});
+
+introduce.addEventListener('click', () => {
+    var name = showFacePrompt();
+});
+
+recognize.addEventListener('click', () => {
+    var serverUrl = document.getElementById("serverUrl").value;
+    var canvasData = canvasFace.toDataURL("image/png");
+
+    if (window.XMLHttpRequest)
+    {
+        ajax = new XMLHttpRequest();
+    }
+    else if (window.ActiveXObject)
+    {
+        ajax = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+
+    ajax.open("POST", "http://" + serverUrl + "/recognize", false);
+    ajax.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    ajax.onreadystatechange = function() {
+        document.getElementById("peopleList").value = JSON.parse(ajax.responseText).name;
+        console.log("Person recognized");
+        console.log(ajax.responseText);
+    }
+    ajax.send(canvasData);
+});
+
+startAndStop.addEventListener('click', () => {
+    if (!streaming)
+    {
+        utils.clearError();
+        utils.startCamera('qvga', onVideoStarted, 'videoInput');
+    } else {
+        utils.stopCamera();
+        onVideoStopped();
+    }
+});
+
+function main()
+{
+    let video = document.getElementById('videoInput');
+    let src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+    let dst = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+    let gray = new cv.Mat();
+    let cap = new cv.VideoCapture(video);
+    let faces = new cv.RectVector();
+    let classifier = new cv.CascadeClassifier();
+    const FPS = 30;
+
+    function processVideo()
+    {
+        if (!streaming)
+        {
+            // clean and stop.
+            src.delete();
+            dst.delete();
+            gray.delete();
+            faces.delete();
+            classifier.delete();
+            return;
+        }
+        let begin = Date.now();
+        cap.read(src);
+        src.copyTo(dst);
+        cv.cvtColor(dst, gray, cv.COLOR_RGBA2GRAY, 0);
+        classifier.detectMultiScale(gray, faces, 1.1, 3, 0);
+        for (let i = 0; i < faces.size(); ++i)
+        {
+            let face = faces.get(i);
+            let point1 = new cv.Point(face.x, face.y);
+            let point2 = new cv.Point(face.x + face.width, face.y + face.height);
+            cv.rectangle(dst, point1, point2, [255, 0, 0, 255]);
+        }
+        cv.imshow('canvasOutput', dst);
+
+        if(faces.size() == 1 && !introducing)
+        {
+            face_roi = src.roi(faces.get(0))
+            cv.imshow('intrducingFormFace', face_roi);
+        }
+
+        let delay = 1000/FPS - (Date.now() - begin);
+        setTimeout(processVideo, delay);
+    };
+
+    classifier.load('haarcascade_frontalface_default.xml');
+
+    setTimeout(processVideo, 0);
+}
+
+function onVideoStarted()
+{
+    streaming = true;
+    startAndStop.innerText = 'Stop';
+    videoInput.width = videoInput.videoWidth;
+    videoInput.height = videoInput.videoHeight;
+    main();
+    introduce.disabled = false;
+    recognize.disabled = false;
+}
+
+function onVideoStopped()
+{
+    streaming = false;
+    canvasContext.clearRect(0, 0, canvasOutput.width, canvasOutput.height);
+    startAndStop.innerText = 'Start';
+    introduce.disabled = true;
+    recognize.disabled = true;
+}
+
+function onPersonIntroduced()
+{
+    var name = document.getElementById("name").value;
+    var serverUrl = document.getElementById("serverUrl").value;
+    var canvasData = canvasFace.toDataURL("image/png");
+
+    if (window.XMLHttpRequest)
+    {
+        ajax = new XMLHttpRequest();
+    }
+    else if (window.ActiveXObject)
+    {
+        ajax = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+
+    ajax.open("POST", "http://" + serverUrl+ "/introduce?name=" + name, false);
+    ajax.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    ajax.onreadystatechange = function() {
+        console.log("Person introduced");
+        console.log(ajax.responseText);
+    }
+    ajax.send(canvasData);
+    hideFacePromt()
+}
+
+function showFacePrompt()
+{
+    introducing = true
+    var popup = document.getElementById("facePrompt");
+    popup.style.display = "";
+}
+
+function hideFacePromt()
+{
+    introducing = false
+    var el = document.getElementById("facePrompt");
+    el.style.display = "none";
+}
+</script>
+</body>
+</html>

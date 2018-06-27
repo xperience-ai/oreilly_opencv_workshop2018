@@ -1,0 +1,1 @@
+./openface.nn4.small2.v1.t7 filter=lfs diff=lfs merge=lfs -text

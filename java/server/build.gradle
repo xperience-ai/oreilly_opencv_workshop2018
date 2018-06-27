@@ -1,0 +1,15 @@
+apply plugin: 'java'
+apply plugin: 'application'
+mainClassName = 'ai.xperience.samples.server.Server'
+
+sourceSets {
+   main {
+      java {
+         srcDir 'src'
+      }
+   }
+}
+
+dependencies {
+    compile files("$System.env.OPENCV_ROOT_DIR/share/OpenCV/java/opencv-341.jar")
+}
