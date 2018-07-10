@@ -15,7 +15,7 @@ Then pass these two files as model and config files to this code
 parser = argparse.ArgumentParser(description='Tensorflow Object Detection using OpenCV')
 parser.add_argument('--model', required=True, help='Path to frozen_inference_graph.pb')
 parser.add_argument('--config', help='Path to .pbtxt file.', required=True)
-parser.add_argument('--images', default='images', help='Path to images folder.', required=True)
+parser.add_argument('--input', default='images', help='Path to images folder.', required=True)
 parser.add_argument('--threshold', default=0.5, type=float, help='Threshold for confidence of detection.')
 parser.add_argument('--classes', default="coco_class_labels.txt", help='Path to COCO class labels.')
 
@@ -24,7 +24,7 @@ args = parser.parse_args()
 
 modelFile = args.model
 configFile = args.config
-image_dir = args.images
+image_dir = args.input
 threshold = args.threshold
 classFile = args.classes
 
@@ -67,7 +67,7 @@ for filename in os.listdir(image_dir):
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 255), cv2.FONT_HERSHEY_DUPLEX)
 
 
-    cv2.imshow(winName, frame)
+    cv2.imshow("Tensoflow OpenCV Object Detection", frame)
     k = cv2.waitKey(0)
     if k == 27 :
         break
