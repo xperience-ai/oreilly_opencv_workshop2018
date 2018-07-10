@@ -1,0 +1,13 @@
+Model files can be downloaded from the Tensorflow Object Detection Model Zoo
+https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md
+
+
+Code is provided in the notebook to download the model file and put it in models folder at runtime
+You can also download the file -- http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v2_coco_2018_03_29.tar.gz and uncompress it inside models foder.
+
+~~~~~~IF YOU WANT TO USE ANY OTHER MODEL EXCEPT THE ONE GIVEN IN THE models FOLDER~~~~~~
+You have to generate the pbtxt file. Following is the process
+Run tf_text_graph_ssd.py file as
+python tf_text_graph_ssd.py --input <path to the frozen_graph.pb> --output <as-u-wish.pbtxt>
+
+The python file is available at https://github.com/opencv/opencv/blob/master/samples/dnn/tf_text_graph_ssd.py
