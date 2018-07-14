@@ -37,7 +37,6 @@ import sys
 import shutil
 from BaseHTTPServer import HTTPServer
 import RestAPIHandler
-import DumpingRecognizer
 import DnnRecognizer
 
 if __name__ == "__main__":

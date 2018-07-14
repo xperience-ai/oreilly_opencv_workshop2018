@@ -1,4 +1,0 @@
-def opencvsdk='/home/alexander/Projects/Xperience/OpenCV-android-sdk'
-include ':opencv'
-project(':opencv').projectDir = new File(opencvsdk + '/sdk')
-include ':app'
