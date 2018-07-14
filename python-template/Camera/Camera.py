@@ -42,13 +42,14 @@ if len(sys.argv) > 1:
 
 source = cv2.VideoCapture(s)
 
-winName = 'Camera Preview'
-cv2.namedWindow(winName, cv2.WINDOW_NORMAL)
+win_name = 'Camera Preview'
+cv2.namedWindow(win_name, cv2.WINDOW_NORMAL)
 
-while cv2.waitKey(1) < 0:
-    hasFrame, frame = source.read()
-    if not hasFrame:
-        cv2.waitKey()
+while cv2.waitKey(1) != 27: # Escape
+    has_frame, frame = source.read()
+    if not has_frame:
         break
+    cv2.imshow(win_name, frame)
 
-    cv2.imshow(winName, frame)
+source.release()
+cv2.destroyWindow(win_name)

@@ -37,12 +37,11 @@ import sys
 import numpy
 import DnnRecognizer
 
-inWidth = 300
-inHeight = 300
-detectionModelConfiguration = "../../data/deploy.prototxt"
-detectionModelBinary = "../../data/res10_300x300_ssd_iter_140000_fp16.caffemodel"
-detectionMeanVal = [104, 117, 123]
-detectionConfidenceThreshold = 0.5
+# Model parameters
+in_width = 300
+in_height = 300
+mean = [104, 117, 123]
+conf_threshold = 0.7
 
 s = 0
 if len(sys.argv) > 1:
@@ -50,61 +49,62 @@ if len(sys.argv) > 1:
 
 source = cv2.VideoCapture(s)
 
-detectionNet = cv2.dnn.readNetFromCaffe(detectionModelConfiguration, detectionModelBinary)
+net = cv2.dnn.readNetFromCaffe("../../data/deploy.prototxt", "../../data/res10_300x300_ssd_iter_140000_fp16.caffemodel")
 recognizer = DnnRecognizer.DnnRecognizer()
 
-winName = 'Camera Preview'
-cv2.namedWindow(winName, cv2.WINDOW_NORMAL)
+win_name = 'Camera Preview'
+cv2.namedWindow(win_name, cv2.WINDOW_NORMAL)
 
 alive = True
 while alive:
-    hasFrame, frame = source.read()
-    if not hasFrame:
-        cv2.waitKey()
+    has_frame, frame = source.read()
+    if not has_frame:
         break
 
-    frameHeight = frame.shape[0]
-    frameWidth = frame.shape[1]
+    frame_height = frame.shape[0]
+    frame_width = frame.shape[1]
 
     # Create a 4D blob from a frame.
-    blob = cv2.dnn.blobFromImage(frame, 1.0, (inWidth, inHeight), detectionMeanVal, False, False)
+    blob = cv2.dnn.blobFromImage(frame, 1.0, (in_width, in_height), mean, False, False)
 
     # Run a model
-    detectionNet.setInput(blob)
-    detections = detectionNet.forward()
+    net.setInput(blob)
+    detections = net.forward()
 
     faces = list()
 
     for i in range(detections.shape[2]):
         confidence = detections[0, 0, i, 2]
-        if confidence > detectionConfidenceThreshold:
-            xLeftBottom = max(0, int(detections[0, 0, i, 3] * frameWidth))
-            yLeftBottom = max(0, int(detections[0, 0, i, 4] * frameHeight))
-            xRightTop = min(frameWidth-1, int(detections[0, 0, i, 5] * frameWidth))
-            yRightTop = min(frameHeight-1, int(detections[0, 0, i, 6] * frameHeight))
-            face_roi = frame[yLeftBottom:yRightTop, xLeftBottom:xRightTop]
+        if confidence > conf_threshold:
+            x_left_bottom = max(0, int(detections[0, 0, i, 3] * frame_width))
+            y_left_bottom = max(0, int(detections[0, 0, i, 4] * frame_height))
+            x_right_top = min(frame_width-1, int(detections[0, 0, i, 5] * frame_width))
+            y_right_top = min(frame_height-1, int(detections[0, 0, i, 6] * frame_height))
+            face_roi = frame[y_left_bottom:y_right_top, x_left_bottom:x_right_top]
             faces.append(face_roi)
 
-            cv2.rectangle(frame, (xLeftBottom, yLeftBottom), (xRightTop, yRightTop), (0, 255, 0))
+            cv2.rectangle(frame, (x_left_bottom, y_left_bottom), (x_right_top, y_right_top), (0, 255, 0))
             label = recognizer.recognize(face_roi)
-            labelSize, baseLine = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+            label_size, base_line = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
 
-            cv2.rectangle(frame, (xLeftBottom, yLeftBottom - labelSize[1]),
-                                (xLeftBottom + labelSize[0], yLeftBottom + baseLine),
+            cv2.rectangle(frame, (x_left_bottom, y_left_bottom - label_size[1]),
+                                (x_left_bottom + label_size[0], y_left_bottom + base_line),
                                 (255, 255, 255), cv2.FILLED)
-            cv2.putText(frame, label, (xLeftBottom, yLeftBottom),
+            cv2.putText(frame, label, (x_left_bottom, y_left_bottom),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
 
-    t, _ = detectionNet.getPerfProfile()
+    t, _ = net.getPerfProfile()
     label = 'Inference time: %.2f ms' % (t * 1000.0 / cv2.getTickFrequency())
     cv2.putText(frame, label, (0, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0))
 
-    cv2.imshow(winName, frame)
+    cv2.imshow(win_name, frame)
     key = cv2.waitKey(1)
-    if key == 113 or key == 81 or key == 27: # 'Q' || 'q' || Esc
+    if key == ord('Q') or key == ord('q') or key == 27:
         alive = False
-    elif key == 105 or key == 73:
+    elif key == ord('I') or key == ord('i'):
         if len(faces) == 1:
             name = raw_input("Enter your name: ")
             recognizer.introduce(faces[0], name)
 
+source.release()
+cv2.destroyWindow(win_name)

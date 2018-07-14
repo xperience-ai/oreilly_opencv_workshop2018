@@ -35,7 +35,7 @@ import numpy
 
 class DnnRecognizer:
     def __init__(self, model_path='../../data/openface.nn4.small2.v1.t7',
-                 model_mean = [0, 0, 0], model_scale = 1.0 / 255):
+                 model_mean = [0, 0, 0], model_in_size = (96, 96), model_scale = 1.0 / 255, conf_threshold = 0.6):
         pass
 
     def introduce(self, image, name):

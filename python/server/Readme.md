@@ -5,15 +5,15 @@ Dependencies
 2. OpenCV 3.4.1 Python bindings with DNN nmodule enabled
 3. Numpy
 
-Start Serevr Locally
+Start SerVer Locally
 ====================
 
-The serever is stared in interactive mode with port 8080 by default:
+The server is stared in interactive mode with port 8080 by default:
 
     $ ./server.py
 
-Start Sserver in Docker
-=======================
+Start Server in Docker
+======================
 
     $ cd ..
     $ docker build --tag server .
@@ -24,13 +24,13 @@ Test Server
 
 In other console:
 
-    alexander@paradox-pc:~/Projects/Xperience/oreilly_opencv_workshop2018/python-server$ curl -F 'file=@./files/lena.jpg' http://localhost:8080/introduce?name=Lena
+    $ ~/Projects/Xperience/oreilly_opencv_workshop2018/python-server$ curl -F 'file=@./files/lena.jpg' http://localhost:8080/introduce?name=Lena
     {"status": 200, "data": {"name": "Lena"}, "success": true}
-    alexander@paradox-pc:~/Projects/Xperience/oreilly_opencv_workshop2018/python-server$ curl -F 'file=@./files/lena.jpg' http://localhost:8080/recognize
+    $ ~/Projects/Xperience/oreilly_opencv_workshop2018/python-server$ curl -F 'file=@./files/lena.jpg' http://localhost:8080/recognize
     {"status": 200, "data": {"name": "Lena"}, "success": true}
-    alexander@paradox-pc:~/Projects/Xperience/oreilly_opencv_workshop2018/python-server$ curl -F 'file=@./files/messi.jpg' http://localhost:8080/introduce?name=Messi
+    $ ~/Projects/Xperience/oreilly_opencv_workshop2018/python-server$ curl -F 'file=@./files/messi.jpg' http://localhost:8080/introduce?name=Messi
     {"status": 200, "data": {"name": "Messi"}, "success": true}
-    alexander@paradox-pc:~/Projects/Xperience/oreilly_opencv_workshop2018/python-server$ curl -F 'file=@./files/lena_other.jpg' http://localhost:8080/recognize
+    $ ~/Projects/Xperience/oreilly_opencv_workshop2018/python-server$ curl -F 'file=@./files/lena_other.jpg' http://localhost:8080/recognize
     {"status": 200, "data": {"name": "Lena"}, "success": true}
-    alexander@paradox-pc:~/Projects/Xperience/oreilly_opencv_workshop2018/python-server$ curl -F 'file=@./files/messi.jpg' http://localhost:8080/recognize
+    $ ~/Projects/Xperience/oreilly_opencv_workshop2018/python-server$ curl -F 'file=@./files/messi.jpg' http://localhost:8080/recognize
     {"status": 200, "data": {"name": "Messi"}, "success": true}

@@ -49,26 +49,25 @@ s = 0
 if len(sys.argv) > 1:
     s = argv[1]
 
-source = cv2.VideoCapture(s)
-
-winName = 'Camera Filters'
-cv2.namedWindow(winName, cv2.WINDOW_NORMAL)
-imageFilter = PREVIEW
-
+win_name = 'Camera Filters'
+image_filter = PREVIEW
 alive = True
+
+source = cv2.VideoCapture(s)
+cv2.namedWindow(win_name, cv2.WINDOW_NORMAL)
+
 while alive:
-    hasFrame, frame = source.read()
-    if not hasFrame:
-        cv2.waitKey()
+    has_frame, frame = source.read()
+    if not has_frame:
         break
 
-    if imageFilter == PREVIEW:
+    if image_filter == PREVIEW:
         result = frame;
-    elif imageFilter == CANNY:
+    elif image_filter == CANNY:
         result = cv2.Canny(frame, 80, 90);
-    elif imageFilter == BLUR:
-        result = cv2.blur(frame, (5,5));
-    elif imageFilter == FEATURES:
+    elif image_filter == BLUR:
+        result = cv2.blur(frame, (13,13));
+    elif image_filter == FEATURES:
          result = frame
          frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
          corners = cv2.goodFeaturesToTrack(frame_gray, **feature_params)
@@ -76,15 +75,19 @@ while alive:
              for x, y in numpy.float32(corners).reshape(-1, 2):
                  cv2.circle(result, (x,y), 10, (0, 255 , 0), 1)
 
-    cv2.imshow(winName, result)
+    cv2.imshow(win_name, result)
+
     key = cv2.waitKey(1)
-    if key == 113 or key == 81 or key == 27: # 'Q' || 'q' || Esc
+    if key == ord('Q') or key == ord('q') or key == 27:
         alive = False
-    elif key == 99 or key == 67: # 'C' || 'c'
-        imageFilter = CANNY
-    elif key == 98 or key == 66: # 'B' || 'b'
-        imageFilter = BLUR
-    elif key == 102 or key == 70: # 'F' || 'f'
-        imageFilter = FEATURES
-    elif key == 112 or key == 80: # 'P' || 'p'
-        imageFilter = PREVIEW
+    elif key == ord('C') or key == ord('c'):
+        image_filter = CANNY
+    elif key == ord('B') or key == ord('b'):
+        image_filter = BLUR
+    elif key == ord('F') or key == ord('f'):
+        image_filter = FEATURES
+    elif key == ord('P') or key == ord('p'):
+        image_filter = PREVIEW
+
+source.release()
+cv2.destroyWindow(win_name)

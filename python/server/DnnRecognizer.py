@@ -32,33 +32,34 @@
 
 import cv2
 import numpy
-import CommonRecognizer
 
-class DnnRecognizer(CommonRecognizer.AbstractRecognizer):
-    def __init__(self, model_path='../../data/openface.nn4.small2.v1.t7', model_mean = [0, 0, 0], model_scale = 1.0 / 255):
+class DnnRecognizer():
+    def __init__(self, model_path='../../data/openface.nn4.small2.v1.t7',
+                 model_mean = [0, 0, 0], model_in_size = (96, 96), model_scale = 1.0 / 255, conf_threshold = 0.6):
         self.known_faces = dict()
         self.model = cv2.dnn.readNetFromTorch(model_path)
         self.mean = model_mean
         self.scale = model_scale
+        self.in_size = model_in_size
+        self.confidence = conf_threshold
 
     def introduce(self, image, name):
         self.known_faces[name] = self._face2vec(cv2.imdecode(numpy.frombuffer(image, dtype=numpy.uint8), cv2.IMREAD_COLOR))
 
     def recognize(self, image):
         vec = self._face2vec(cv2.imdecode(numpy.frombuffer(image, dtype=numpy.uint8), cv2.IMREAD_COLOR))
-        bestMatchName = 'unknown'
-        bestMatchScore = 0.5
+        best_match_name = 'unknown'
+        best_match_score = self.confidence
         # NOTE: Replace iteritems() method to items() if you use Python3
         for name, descriptor in self.known_faces.iteritems():
-            score = 0.0
             score = vec.dot(descriptor.T)
-            if (score > bestMatchScore):
-                bestMatchScore = score
-                bestMatchName = name
-        return bestMatchName
+            if (score > best_match_score):
+                best_match_score = score
+                best_match_name = name
+        return best_match_name
 
     def _face2vec(self, face):
-        blob = cv2.dnn.blobFromImage(face, self.scale, (96, 96), self.mean, False, False)
+        blob = cv2.dnn.blobFromImage(face, self.scale, self.in_size, self.mean, False, False)
         self.model.setInput(blob)
         vec = self.model.forward()
         return vec
