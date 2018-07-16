@@ -32,7 +32,7 @@ The script for installing OpenCV in Windows is present in Windows folder. The de
 
 3) Type `python main.py` and press `Enter`. Select appropriate OpenCV version. Default version is 3.4.1
 
-4) Type `installOpenCV.bit` and press `Enter`.
+4) Type `installOpenCV.bat` and press `Enter`.
 
 5) Remove `runScript.bat`: `del runScript.bat`.
 
