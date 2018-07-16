@@ -26,13 +26,13 @@ The script for installing OpenCV in Ubuntu 18.04 is present in Ubuntu 18 folder.
 
 The script for installing OpenCV in Windows is present in Windows folder. The detailed procedure is as follows:
 
-1) Install ![Anaconda 3](https://www.anaconda.com/download/#windows), ![Visual Studio 2015](https://visualstudio.microsoft.com/vs/older-downloads/), ![Git for Windows](https://git-scm.com/download/win) and ![CMake](https://cmake.org/download/). **Make sure you download the correct version (64 bit or 32 bit)**. Also, make sure that you put Anaconda 3, CMake, and Git in your `PATH` during installation.
+1) Install [Anaconda 3](https://www.anaconda.com/download/#windows), [Visual Studio 2015](https://visualstudio.microsoft.com/vs/older-downloads/), [Git for Windows](https://git-scm.com/download/win) and [CMake](https://cmake.org/download/). **Make sure you download the correct version (64 bit or 32 bit)**. Also, make sure that you put Anaconda 3, CMake, and Git in your `PATH` during installation.
 
 2) Press `Start`, type `Command Line` and press `Enter`. 
 
 3) Type `python main.py` and press `Enter`. Select appropriate OpenCV version. Default version is 3.4.1
 
-4) Type `installOpenCV.bit` and press `Enter`.
+4) Type `installOpenCV.bat` and press `Enter`.
 
 5) Remove `runScript.bat`: `del runScript.bat`.
 
