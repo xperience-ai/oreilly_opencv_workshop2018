@@ -29,7 +29,7 @@ threshold = args.threshold
 classFile = args.classes
 
 with open(classFile) as fi:
-    labels = fi.readline().strip().split()
+    labels = fi.read().split("\n")
 
 # Read the Tensorflow network
 net = cv2.dnn.readNetFromTensorflow(modelFile, configFile)
@@ -39,12 +39,13 @@ for filename in os.listdir(image_dir):
     frame = cv2.imread(os.path.join(image_dir, filename))
 
     # Resize the image to the dimension required for SSD
-    frame = cv2.resize(frame, (300, 300))
     rows = frame.shape[0]
     cols = frame.shape[1]
+    frameResized = cv2.resize(frame, (300, 300))
+
 
     # Create a blob from the image and pass it to the network
-    net.setInput(cv2.dnn.blobFromImage(frame, 1.0/127.5, (300, 300), (127.5, 127.5, 127.5), True))
+    net.setInput(cv2.dnn.blobFromImage(frameResized, 1.0/127.5, (300, 300), (127.5, 127.5, 127.5), True))
     
     # Peform Prediction
     out = net.forward()
@@ -63,10 +64,11 @@ for filename in os.listdir(image_dir):
         
         # Check if the detection is of good quality
         if score > threshold:
-            cv2.putText(frame, "{}".format(labels[classId]), ( x, y ), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 1, cv2.LINE_AA)
+            cv2.putText(frame, "{}".format(labels[classId]), ( x, y ), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 255), cv2.FONT_HERSHEY_DUPLEX)
 
 
+    cv2.imwrite('imout.jpg', frame)
     cv2.imshow("Tensoflow OpenCV Object Detection", frame)
     k = cv2.waitKey(0)
     if k == 27 :
