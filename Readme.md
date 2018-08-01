@@ -1,7 +1,7 @@
 Intro
 =====
 
-The repo contains source code and other materials needed for OpenCV workshop.
+The repo contains OpenCV setup instructions, source code and other materials needed for OpenCV workshop.
 The workshop covers the same set of computer vision use cases implemented with
 OpenCV using different technologies. The workshop is designed for Windows,
 Linux (Ubuntu 16.04 recommended) or Mac OS.
